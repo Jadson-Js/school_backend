@@ -33,8 +33,8 @@ O JSON deve ter EXATAMENTE a seguinte estrutura:
 {
   "ludic_introduction": "...",
   "bncc_goal": "...",
-  "step_by_step": "...",
-  "rubric_evaluation": "..."
+  "step_by_step": [{etapa: "...", tempo: "...", descricao: "..."}],
+  "rubric_evaluation": { excelente: "...", bom: "...", satisfatorio: "...", em_desenvolvimento: "..."}
 }
 `.trim()
   }

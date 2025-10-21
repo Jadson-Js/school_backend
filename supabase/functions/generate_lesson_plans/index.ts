@@ -17,13 +17,11 @@ import { CORS_HEADERS } from '../shared/consts.ts'
 
 
 
-/**
- * Valida os campos obrigatórios da requisição
- */
 function validateRequest(data: Partial<LessonPlanRequest>): string | null {
   if (!data.topic) return "Campo 'topic' é obrigatório."
   if (!data.grade_level) return "Campo 'grade_level' é obrigatório."
   if (!data.subject) return "Campo 'subject' é obrigatório."
+  if (data.duration_minutes && parseInt(data.duration_minutes) < 15) return "Duração em minuto maior que 15"
 
   return null
 }

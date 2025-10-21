@@ -3,7 +3,7 @@ export interface LessonPlanRequest {
   grade_level: string
   subject: string
   learning_context?: string
-  duration_minutes?: number
+  duration_minutes?: string
 }
 
 export interface LessonPlanResponse {
