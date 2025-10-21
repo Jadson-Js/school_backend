@@ -4,8 +4,8 @@ RETURNS TRIGGER
 SET search_path = ''
 AS $$
 BEGIN
-  INSERT INTO public.profiles (user_id, name)
-  VALUES ( NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', 'Novo Usuário'));
+  INSERT INTO public.profiles (user_id)
+  VALUES ( NEW.id);
   RETURN NEW;
 END;
 $$ 

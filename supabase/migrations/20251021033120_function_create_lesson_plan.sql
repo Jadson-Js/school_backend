@@ -10,9 +10,9 @@ CREATE OR REPLACE FUNCTION insert_lesson_plan (
   p_generated_content JSONB,
   p_prompt_debug TEXT
 )
-RETURNS lesson_plans -- Retorna o plano de aula recém-criado
+RETURNS lesson_plans
 LANGUAGE sql
-SECURITY INVOKER -- Essencial para que auth.uid() funcione corretamente
+SECURITY INVOKER
 AS $$
   INSERT INTO public.lesson_plans (
     topic,
@@ -22,7 +22,6 @@ AS $$
     duration_minutes,
     generated_content,
     prompt_debug
-    -- user_id é pego do DEFAULT auth.uid()
   )
   VALUES (
     p_topic,
@@ -33,5 +32,5 @@ AS $$
     p_generated_content,
     p_prompt_debug
   )
-  RETURNING *; -- Retorna a linha completa que acabou de ser inserida
+  RETURNING *;
 $$;

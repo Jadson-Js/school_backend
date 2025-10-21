@@ -5,7 +5,6 @@ CREATE TABLE PUBLIC.profiles (
   user_id UUID NOT NULL DEFAULT auth.UID(),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  name TEXT NOT NULL,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
