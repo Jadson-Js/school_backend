@@ -114,15 +114,7 @@ serve(async (req) => {
     return jsonResponse({
       success: true,
       lesson_plan_id: savedData,
-      content: parsedContent, // Retorna o objeto parseado
-      metadata: {
-        topic: params.topic,
-        grade_level: params.grade_level,
-        subject: params.subject,
-        learning_context: params.learning_context,
-        duration_minutes: params.duration_minutes,
-        created_at: new Date().toISOString()
-      }
+      content: parsedContent,
     })
 
   } catch (error) {
