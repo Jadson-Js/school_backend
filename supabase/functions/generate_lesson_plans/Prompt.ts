@@ -43,6 +43,7 @@ O JSON deve ter EXATAMENTE a seguinte estrutura:
     const genAI = new GoogleGenerativeAI(this.apiKey)
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash',
+      // @ts-ignore - responseMimeType existe mas não está na tipagem da versão 0.7.0
       generationConfig: { responseMimeType: 'application/json' },
     })
 
@@ -62,7 +63,9 @@ O JSON deve ter EXATAMENTE a seguinte estrutura:
       
       return parsed as LessonPlanResponse
     } catch (error) {
-      throw new Error(`Erro ao processar resposta da IA: ${error.message}`)
+      // Corrigido: Type assertion para error
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+      throw new Error(`Erro ao processar resposta da IA: ${errorMessage}`)
     }
   }
 }
