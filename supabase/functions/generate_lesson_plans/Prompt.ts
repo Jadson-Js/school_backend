@@ -128,7 +128,6 @@ IMPORTANTE: Responda APENAS com o JSON. Comece sua resposta com { e termine com 
 
   static parseAIResponse(aiResponse: string): LessonPlanResponse {
     try {
-      // Remove possíveis caracteres de markdown/code block
       const cleaned = aiResponse
         .replace(/^```json?\n?/i, '')
         .replace(/\n?```$/i, '')
@@ -136,7 +135,6 @@ IMPORTANTE: Responda APENAS com o JSON. Comece sua resposta com { e termine com 
       
       const parsed = JSON.parse(cleaned)
       
-      // Validação estrutural profunda
       if (!parsed.ludic_introduction || typeof parsed.ludic_introduction !== 'string') {
         throw new Error('Campo ludic_introduction ausente ou inválido')
       }
@@ -149,7 +147,6 @@ IMPORTANTE: Responda APENAS com o JSON. Comece sua resposta com { e termine com 
         throw new Error('Campo step_by_step deve ser um array com pelo menos 3 etapas')
       }
       
-      // Valida cada etapa
       parsed.step_by_step.forEach((step: any, index: number) => {
         if (!step.etapa || !step.tempo || !step.descricao) {
           throw new Error(`Etapa ${index + 1} está incompleta`)

@@ -14,7 +14,7 @@ AS permissive
 FOR INSERT
 TO public
 WITH CHECK (
-  (auth.uid() = user_id)
+  ((select auth.uid()) = user_id)
   AND
   ((SELECT email_confirmed_at FROM auth.users WHERE id = auth.uid()) IS NOT NULL)
 );
@@ -24,13 +24,13 @@ ON public.profiles
 AS permissive
 FOR UPDATE
 TO public
-USING ((auth.uid() = user_id))
-WITH CHECK ((auth.uid() = user_id));
+USING (((select auth.uid()) = user_id))
+WITH CHECK (((select auth.uid()) = user_id));
 
 CREATE POLICY "allow full access for authenticated users on their own plans"
 ON public.lesson_plans
 AS permissive
 FOR ALL
 TO public
-USING ((auth.uid() = user_id))
-WITH CHECK ((auth.uid() = user_id));
+USING (((select auth.uid()) = user_id))
+WITH CHECK (((select auth.uid()) = user_id))

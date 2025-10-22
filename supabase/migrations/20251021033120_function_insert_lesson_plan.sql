@@ -1,12 +1,10 @@
 CREATE OR REPLACE FUNCTION insert_lesson_plan (
-  -- Parâmetros da requisição original
   p_topic TEXT,
   p_grade_level TEXT,
   p_subject TEXT,
   p_learning_context TEXT,
   p_duration_minutes SMALLINT,
   
-  -- Parâmetros da IA
   p_generated_content JSONB,
   p_prompt_debug TEXT
 )

@@ -3,57 +3,48 @@ import { assertEquals, assertExists, assertRejects } from "https://deno.land/std
 import { Prompt } from "./Prompt.ts";
 import { LessonPlanRequest } from "../shared/types.ts";
 
-// ============================================
-// DADOS DE TESTE
-// ============================================
-
 const validLessonPlanRequest: LessonPlanRequest = {
-  topic: "Fotossíntese",
-  grade_level: "7º ano",
-  subject: "Ciências",
-  learning_context: "Turma com diferentes níveis",
+  topic: "Photosynthesis",
+  grade_level: "7th grade",
+  subject: "Science",
+  learning_context: "Class with different learning levels",
   duration_minutes: "45"
 };
 
 const minimalLessonPlanRequest: LessonPlanRequest = {
-  topic: "Adição",
-  grade_level: "2º ano",
-  subject: "Matemática"
+  topic: "Addition",
+  grade_level: "2nd grade",
+  subject: "Math"
 };
 
 const validAIResponse = JSON.stringify({
-  ludic_introduction: "Vamos imaginar que somos plantas...",
-  bncc_goal: "EF07CI05 - Compreender o processo de fotossíntese",
+  ludic_introduction: "Let's imagine we are plants...",
+  bncc_goal: "EF07CI05 - Understand the photosynthesis process",
   step_by_step: [
     {
-      etapa: "Introdução",
-      tempo: "10 minutos",
-      descricao: "Apresentação do tema"
+      etapa: "Introduction",
+      tempo: "10 minutes",
+      descricao: "Presentation of the topic"
     },
     {
-      etapa: "Desenvolvimento",
-      tempo: "25 minutos",
-      descricao: "Explicação detalhada do processo"
+      etapa: "Development",
+      tempo: "25 minutes",
+      descricao: "Detailed explanation of the process"
     },
     {
-      etapa: "Conclusão",
-      tempo: "10 minutos",
-      descricao: "Revisão e fixação"
+      etapa: "Conclusion",
+      tempo: "10 minutes",
+      descricao: "Review and reinforcement"
     }
   ],
   rubric_evaluation: {
-    excelente: "Demonstra compreensão completa do processo",
-    bom: "Compreende a maioria dos conceitos",
-    satisfatorio: "Compreende conceitos básicos",
-    em_desenvolvimento: "Necessita reforço"
+    excelente: "Shows full understanding of the process",
+    bom: "Understands most of the concepts",
+    satisfatorio: "Understands basic concepts",
+    em_desenvolvimento: "Needs reinforcement"
   }
 });
 
-// ============================================
-// MOCK SETUP
-// ============================================
-
-// Guarda a implementação original
 let originalExecute: any;
 let mockResponse: string = validAIResponse;
 let shouldThrow: boolean = false;
@@ -62,36 +53,33 @@ function setupMock(response: string = validAIResponse, throwError: boolean = fal
   mockResponse = response;
   shouldThrow = throwError;
   
-  // Guarda o método original se ainda não foi guardado
   if (!originalExecute) {
     originalExecute = Prompt.execute;
   }
   
-  // Sobrescreve o método execute
   //@ts-ignore
   Prompt.execute = async (request: LessonPlanRequest, apiKey: string) => {
     if (shouldThrow) {
       throw new Error("API Error: Rate limit exceeded");
     }
     
-    // Gera o prompt usando a lógica original (simulada)
-    const prompt = `Você é um especialista em pedagogia e conhece profundamente a BNCC (Base Nacional Comum Curricular) brasileira.
+    const prompt = `You are an expert in pedagogy and have deep knowledge of the Brazilian BNCC (Base Nacional Comum Curricular).
 
-Crie um plano de aula detalhado com base nas seguintes informações:
+Create a detailed lesson plan based on the following information:
 
-Tema: ${request.topic}
-Ano/Série: ${request.grade_level}
-Disciplina: ${request.subject}
-Contexto de aprendizagem: ${request.learning_context || "Sala de aula padrão"}
-Duração da aula: ${request.duration_minutes || "Não especificada"}
+Topic: ${request.topic}
+Grade Level: ${request.grade_level}
+Subject: ${request.subject}
+Learning Context: ${request.learning_context || "Standard classroom"}
+Lesson Duration: ${request.duration_minutes || "Not specified"}
 
-O plano deve incluir:
-1. Uma introdução lúdica e envolvente
-2. Objetivo de aprendizagem alinhado à BNCC
-3. Passo a passo detalhado da aula
-4. Rubrica de avaliação
+The plan must include:
+1. A playful and engaging introduction
+2. Learning objective aligned with BNCC
+3. Detailed step-by-step of the lesson
+4. Evaluation rubric
 
-IMPORTANTE: Retorne APENAS um JSON válido, sem markdown ou texto adicional, seguindo esta estrutura:
+IMPORTANT: Return ONLY a valid JSON, without markdown or additional text, following this structure:
 {
   "ludic_introduction": "string",
   "bncc_goal": "string",
@@ -125,26 +113,22 @@ function restoreMock() {
   shouldThrow = false;
 }
 
-// ============================================
-// TESTES - parseAIResponse
-// ============================================
-
 //@ts-ignore
-Deno.test("Prompt.parseAIResponse - Success com resposta válida", () => {
+Deno.test("Prompt.parseAIResponse - Success with valid response", () => {
   const result = Prompt.parseAIResponse(validAIResponse);
   
   assertExists(result);
-  assertEquals(result.ludic_introduction, "Vamos imaginar que somos plantas...");
-  assertEquals(result.bncc_goal, "EF07CI05 - Compreender o processo de fotossíntese");
+  assertEquals(result.ludic_introduction, "Let's imagine we are plants...");
+  assertEquals(result.bncc_goal, "EF07CI05 - Understand the photosynthesis process");
   assertExists(result.step_by_step);
   assertEquals(result.step_by_step.length, 3);
   assertExists(result.rubric_evaluation);
   //@ts-ignore
-  assertEquals(result.rubric_evaluation.excelente, "Demonstra compreensão completa do processo");
+  assertEquals(result.rubric_evaluation.excelente, "Shows full understanding of the process");
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Success com parâmetros mínimos (sem learning_context e duration_minutes)", async () => {
+Deno.test("Prompt.execute - Success with minimal parameters (without learning_context and duration_minutes)", async () => {
   setupMock();
   
   try {
@@ -154,21 +138,21 @@ Deno.test("Prompt.execute - Success com parâmetros mínimos (sem learning_conte
     assertExists(result.response);
     assertExists(result.prompt);
     
-    // Verifica valores padrão no prompt
-    assertEquals(result.prompt.includes("Sala de aula padrão"), true);
-    assertEquals(result.prompt.includes("Não especificada"), true);
+    // Check default values in prompt
+    assertEquals(result.prompt.includes("Standard classroom"), true);
+    assertEquals(result.prompt.includes("Not specified"), true);
     
-    // Verifica campos obrigatórios
-    assertEquals(result.prompt.includes("Adição"), true);
-    assertEquals(result.prompt.includes("2º ano"), true);
-    assertEquals(result.prompt.includes("Matemática"), true);
+    // Check required fields
+    assertEquals(result.prompt.includes("Addition"), true);
+    assertEquals(result.prompt.includes("2nd grade"), true);
+    assertEquals(result.prompt.includes("Math"), true);
   } finally {
     restoreMock();
   }
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Prompt contém instruções BNCC", async () => {
+Deno.test("Prompt.execute - Prompt contains BNCC instructions", async () => {
   setupMock();
   
   try {
@@ -176,20 +160,20 @@ Deno.test("Prompt.execute - Prompt contém instruções BNCC", async () => {
     
     assertEquals(result.prompt.includes("BNCC"), true);
     assertEquals(result.prompt.includes("Base Nacional Comum Curricular"), true);
-    assertEquals(result.prompt.includes("especialista em pedagogia"), true);
+    assertEquals(result.prompt.includes("expert in pedagogy"), true);
   } finally {
     restoreMock();
   }
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Prompt especifica formato JSON", async () => {
+Deno.test("Prompt.execute - Prompt specifies JSON format", async () => {
   setupMock();
   
   try {
     const result = await Prompt.execute(validLessonPlanRequest, "mock-api-key");
     
-    assertEquals(result.prompt.includes("JSON válido"), true);
+    assertEquals(result.prompt.includes("valid JSON"), true);
     assertEquals(result.prompt.includes("ludic_introduction"), true);
     assertEquals(result.prompt.includes("bncc_goal"), true);
     assertEquals(result.prompt.includes("step_by_step"), true);
@@ -200,7 +184,7 @@ Deno.test("Prompt.execute - Prompt especifica formato JSON", async () => {
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Error quando API lança exceção", async () => {
+Deno.test("Prompt.execute - Error when API throws exception", async () => {
   setupMock(validAIResponse, true);
   
   try {
@@ -217,21 +201,19 @@ Deno.test("Prompt.execute - Error quando API lança exceção", async () => {
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Resposta contém estrutura esperada", async () => {
+Deno.test("Prompt.execute - Response contains expected structure", async () => {
   setupMock();
   
   try {
     const result = await Prompt.execute(validLessonPlanRequest, "mock-api-key");
     const parsed = JSON.parse(result.response);
     
-    // Verifica estrutura do step_by_step
     assertEquals(Array.isArray(parsed.step_by_step), true);
     assertEquals(parsed.step_by_step.length > 0, true);
     assertExists(parsed.step_by_step[0].etapa);
     assertExists(parsed.step_by_step[0].tempo);
     assertExists(parsed.step_by_step[0].descricao);
     
-    // Verifica estrutura do rubric_evaluation
     assertExists(parsed.rubric_evaluation.excelente);
     assertExists(parsed.rubric_evaluation.bom);
     assertExists(parsed.rubric_evaluation.satisfatorio);
@@ -242,19 +224,19 @@ Deno.test("Prompt.execute - Resposta contém estrutura esperada", async () => {
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Caracteres especiais no topic são tratados corretamente", async () => {
+Deno.test("Prompt.execute - Special characters in topic are handled correctly", async () => {
   setupMock();
   
   try {
     const requestWithSpecialChars: LessonPlanRequest = {
-      topic: "Operações com frações: adição & subtração (1/2 + 1/4)",
-      grade_level: "5º ano",
-      subject: "Matemática"
+      topic: "Operations with fractions: addition & subtraction (1/2 + 1/4)",
+      grade_level: "5th grade",
+      subject: "Math"
     };
     
     const result = await Prompt.execute(requestWithSpecialChars, "mock-api-key");
     
-    assertEquals(result.prompt.includes("Operações com frações: adição & subtração (1/2 + 1/4)"), true);
+    assertEquals(result.prompt.includes("Operations with fractions: addition & subtraction (1/2 + 1/4)"), true);
     assertExists(result.response);
   } finally {
     restoreMock();
@@ -262,14 +244,14 @@ Deno.test("Prompt.execute - Caracteres especiais no topic são tratados corretam
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Duration_minutes como string é incluída no prompt", async () => {
+Deno.test("Prompt.execute - Duration_minutes as string is included in prompt", async () => {
   setupMock();
   
   try {
     const requestWithDuration: LessonPlanRequest = {
-      topic: "Teste",
-      grade_level: "6º ano",
-      subject: "História",
+      topic: "Test",
+      grade_level: "6th grade",
+      subject: "History",
       duration_minutes: "90"
     };
     
@@ -282,32 +264,28 @@ Deno.test("Prompt.execute - Duration_minutes como string é incluída no prompt"
 });
 
 //@ts-ignore
-Deno.test("Prompt.execute - Learning_context personalizado aparece no prompt", async () => {
+Deno.test("Prompt.execute - Custom learning_context appears in prompt", async () => {
   setupMock();
   
   try {
     const requestWithContext: LessonPlanRequest = {
-      topic: "Teste",
-      grade_level: "8º ano",
-      subject: "Geografia",
-      learning_context: "Turma EJA (Educação de Jovens e Adultos)"
+      topic: "Test",
+      grade_level: "8th grade",
+      subject: "Geography",
+      learning_context: "EJA class (Youth and Adult Education)"
     };
     
     const result = await Prompt.execute(requestWithContext, "mock-api-key");
     
-    assertEquals(result.prompt.includes("Turma EJA (Educação de Jovens e Adultos)"), true);
-    assertEquals(result.prompt.includes("Sala de aula padrão"), false);
+    assertEquals(result.prompt.includes("EJA class (Youth and Adult Education)"), true);
+    assertEquals(result.prompt.includes("Standard classroom"), false);
   } finally {
     restoreMock();
   }
 });
 
-// ============================================
-// TESTES DE INTEGRAÇÃO
-// ============================================
-
 //@ts-ignore
-Deno.test("Integration - execute e parseAIResponse funcionam juntos", async () => {
+Deno.test("Integration - execute and parseAIResponse work together", async () => {
   setupMock();
   
   try {
@@ -315,7 +293,7 @@ Deno.test("Integration - execute e parseAIResponse funcionam juntos", async () =
     const parsed = Prompt.parseAIResponse(executeResult.response);
     
     assertExists(parsed);
-    assertEquals(parsed.ludic_introduction, "Vamos imaginar que somos plantas...");
+    assertEquals(parsed.ludic_introduction, "Let's imagine we are plants...");
     assertEquals(parsed.step_by_step.length, 3);
   } finally {
     restoreMock();

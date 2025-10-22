@@ -1,37 +1,20 @@
 //@ts-ignore
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import {createSupabaseClient} from "../shared/createSupabaseClient.ts"
+import { createSupabaseClient } from "../shared/createSupabaseClient.ts"
 import { LessonPlanRequest, LessonPlanResponse } from '../shared/types.ts'
 import { jsonResponse } from '../shared/jsonResponse.ts'
 import { Prompt } from './Prompt.ts'
 import { CORS_HEADERS } from '../shared/consts.ts'
 
-// ============================================
-// CONFIGURAÇÕES E CONSTANTES
-// ============================================
-
-
-
-
-
-
-
-
 function validateRequest(data: Partial<LessonPlanRequest>): string | null {
-  if (!data.topic) return "Campo 'topic' é obrigatório."
-  if (!data.grade_level) return "Campo 'grade_level' é obrigatório."
-  if (!data.subject) return "Campo 'subject' é obrigatório."
-  if (data.duration_minutes && parseInt(data.duration_minutes) < 15) return "Duração em minuto maior que 15"
+  if (!data.topic) return "Field 'topic' is required."
+  if (!data.grade_level) return "Field 'grade_level' is required."
+  if (!data.subject) return "Field 'subject' is required."
+  if (data.duration_minutes && parseInt(data.duration_minutes) < 15) return "Duration must be greater than 15 minutes."
 
   return null
 }
 
-
-
-
-/**
- * Salva o plano de aula no banco de dados
- */
 async function saveLessonPlan(
   supabaseClient: ReturnType<typeof createSupabaseClient>,
   params: LessonPlanRequest,
@@ -49,41 +32,29 @@ async function saveLessonPlan(
   })
 
   if (error) {
-    throw new Error(`Erro ao salvar no banco: ${error.message}`)
+    throw new Error(`Error saving to database: ${error.message}`)
   }
 
   return data
 }
 
-/**
- * Parse seguro do JSON retornado pela IA
- */
-
-
-// ============================================
-// HANDLER PRINCIPAL
-// ============================================
 serve(async (req) => {
-  // Trata requisições OPTIONS (CORS preflight)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS })
   }
 
   try {
-    // 1. Valida autenticação
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      throw jsonResponse({ error: 'Usuário não autenticado.' }, 401)
+      throw jsonResponse({ error: 'User not authenticated.' }, 401)
     }
 
-    // 2. Valida chave da API da IA
     //@ts-ignore
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) {
-      return jsonResponse({ error: 'GEMINI_API_KEY não configurada.' }, 500)
+      return jsonResponse({ error: 'GEMINI_API_KEY not configured.' }, 500)
     }
 
-    // 3. Parse e valida o corpo da requisição
     const requestData: Partial<LessonPlanRequest> = await req.json()
     
     const validationError = validateRequest(requestData)
@@ -93,24 +64,19 @@ serve(async (req) => {
 
     const params = requestData as LessonPlanRequest
 
-    // 4. Cria cliente Supabase autenticado
     const supabaseClient = createSupabaseClient(authHeader)
 
-    // 5. Gera o prompt e chama a IA
     const aiResponse = await Prompt.execute(params, geminiApiKey)
 
-    // 6. Parse o JSON retornado pela IA
     const parsedContent = Prompt.parseAIResponse(aiResponse.response)
 
-    // 7. Salva no banco de dados
     const savedData = await saveLessonPlan(
       supabaseClient,
       params,
-      aiResponse.response, // Salva o JSON string no banco
+      aiResponse.response,
       aiResponse.prompt
     )
 
-    // 8. Retorna o JSON parseado + dados do banco
     return jsonResponse({
       success: true,
       lesson_plan_id: savedData,
@@ -118,20 +84,18 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Erro na função:', error)
+    console.error('Function error:', error)
 
-    // Trata erros de JSON inválido
     if (error instanceof SyntaxError) {
       return jsonResponse(
-        { error: 'Corpo da requisição inválido (não é JSON).' },
+        { error: 'Invalid request body (not JSON).' },
         400
       )
     }
 
-    // Trata outros erros
     return jsonResponse(
       { 
-        error: error.message || 'Erro interno do servidor',
+        error: error.message || 'Internal server error',
         //@ts-ignore
         details: Deno.env.get('ENVIRONMENT') === 'development' ? error.stack : undefined
       },

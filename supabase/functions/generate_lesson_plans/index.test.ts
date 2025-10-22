@@ -1,29 +1,26 @@
 //@ts-ignore
 import { assertEquals, assertExists } from "https://deno.land/std@0.203.0/assert/mod.ts";
 
-// Mock do módulo Prompt (sem usar stub em objetos vazios)
 const createMockPrompt = () => ({
   execute: async (params: any, apiKey: string) => ({
     response: JSON.stringify({
-      title: "Plano de Aula: Matemática Básica",
-      objectives: ["Objetivo 1", "Objetivo 2"],
+      title: "Lesson Plan: Basic Math",
+      objectives: ["Objective 1", "Objective 2"],
       activities: [
-        { name: "Atividade 1", duration: "20min", description: "Descrição" }
+        { name: "Activity 1", duration: "20min", description: "Description" }
       ]
     }),
-    prompt: "Prompt de teste gerado"
+    prompt: "Generated test prompt"
   }),
   parseAIResponse: (response: string) => JSON.parse(response)
 });
 
-// Mock da função de criação do cliente Supabase
 const createMockSupabaseClient = (
   rpcResponse: { data: unknown; error: unknown }
 ) => ({
   rpc: async (functionName: string, params: any) => rpcResponse
 });
 
-// Mock do Request
 const mockRequest = (
   body: unknown,
   authHeader: string | null = "Bearer mock-token"
@@ -40,14 +37,12 @@ const mockRequest = (
   });
 };
 
-// Mock para OPTIONS (CORS preflight)
 const mockOptionsRequest = (): Request => {
   return new Request("http://localhost/lesson-plan", {
     method: "OPTIONS",
   });
 };
 
-// Função auxiliar para simular o handler
 const mockHandler = async (
   req: Request,
   supabaseClient: any,
@@ -61,14 +56,14 @@ const mockHandler = async (
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
     return new Response(
-      JSON.stringify({ error: "Usuário não autenticado." }),
+      JSON.stringify({ error: "User not authenticated." }),
       { status: 401, headers: { "Content-Type": "application/json" } }
     );
   }
 
   if (!geminiApiKey) {
     return new Response(
-      JSON.stringify({ error: "GEMINI_API_KEY não configurada." }),
+      JSON.stringify({ error: "GEMINI_API_KEY not configured." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
@@ -78,43 +73,41 @@ const mockHandler = async (
     requestData = await req.json();
   } catch (e) {
     return new Response(
-      JSON.stringify({ error: "Corpo da requisição inválido (não é JSON)." }),
+      JSON.stringify({ error: "Invalid request body (not JSON)." }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // Validação
   if (!requestData.topic) {
     return new Response(
-      JSON.stringify({ error: "Campo 'topic' é obrigatório." }),
+      JSON.stringify({ error: "Field 'topic' is required." }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
   if (!requestData.grade_level) {
     return new Response(
-      JSON.stringify({ error: "Campo 'grade_level' é obrigatório." }),
+      JSON.stringify({ error: "Field 'grade_level' is required." }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
   if (!requestData.subject) {
     return new Response(
-      JSON.stringify({ error: "Campo 'subject' é obrigatório." }),
+      JSON.stringify({ error: "Field 'subject' is required." }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
   if (requestData.duration_minutes && parseInt(requestData.duration_minutes) < 15) {
     return new Response(
-      JSON.stringify({ error: "Duração em minuto maior que 15" }),
+      JSON.stringify({ error: "Duration in minutes must be greater than 15." }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
   try {
-    // Chama a IA
     const aiResponse = await promptModule.execute(requestData, geminiApiKey);
     const parsedContent = promptModule.parseAIResponse(aiResponse.response);
 
-    // Salva no banco
+    // Save to database
     const { data, error } = await supabaseClient.rpc("insert_lesson_plan", {
       p_topic: requestData.topic,
       p_grade_level: requestData.grade_level,
@@ -127,7 +120,7 @@ const mockHandler = async (
 
     if (error) {
       return new Response(
-        JSON.stringify({ error: `Erro ao salvar no banco: ${error.message}` }),
+        JSON.stringify({ error: `Error saving to database: ${error.message}` }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -150,15 +143,11 @@ const mockHandler = async (
     );
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: error.message || "Erro interno do servidor" }),
+      JSON.stringify({ error: error.message || "Internal server error." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
-
-// ============================================
-// TESTES
-// ============================================
 
 //@ts-ignore
 Deno.test("Handler - CORS preflight (OPTIONS)", async () => {
@@ -172,11 +161,11 @@ Deno.test("Handler - CORS preflight (OPTIONS)", async () => {
 });
 
 //@ts-ignore
-Deno.test("Handler - Success (200) - Plano de aula criado com sucesso", async () => {
+Deno.test("Handler - Success (200) - Lesson plan successfully created", async () => {
   const body = {
-    topic: "Adição e Subtração",
-    grade_level: "3º ano",
-    subject: "Matemática",
+    topic: "Addition and Subtraction",
+    grade_level: "3rd grade",
+    subject: "Math",
     duration_minutes: "45"
   };
   
@@ -195,17 +184,17 @@ Deno.test("Handler - Success (200) - Plano de aula criado com sucesso", async ()
   assertEquals(json.lesson_plan_id, "lesson-plan-uuid-123");
   assertExists(json.content);
   assertExists(json.metadata);
-  assertEquals(json.metadata.topic, "Adição e Subtração");
-  assertEquals(json.metadata.grade_level, "3º ano");
+  assertEquals(json.metadata.topic, "Addition and Subtraction");
+  assertEquals(json.metadata.grade_level, "3rd grade");
 });
 
 //@ts-ignore
-Deno.test("Handler - Success com learning_context opcional", async () => {
+Deno.test("Handler - Success with optional learning_context", async () => {
   const body = {
-    topic: "Fotossíntese",
-    grade_level: "7º ano",
-    subject: "Ciências",
-    learning_context: "Turma com alunos de diferentes níveis",
+    topic: "Photosynthesis",
+    grade_level: "7th grade",
+    subject: "Science",
+    learning_context: "Class with students of varying levels",
     duration_minutes: "60"
   };
   
@@ -220,18 +209,18 @@ Deno.test("Handler - Success com learning_context opcional", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 200);
-  assertEquals(json.metadata.learning_context, "Turma com alunos de diferentes níveis");
+  assertEquals(json.metadata.learning_context, "Class with students of varying levels");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 401 - Sem autenticação", async () => {
+Deno.test("Handler - Error 401 - No authentication", async () => {
   const body = {
-    topic: "Teste",
-    grade_level: "5º ano",
-    subject: "História"
+    topic: "Test",
+    grade_level: "5th grade",
+    subject: "History"
   };
   
-  const req = mockRequest(body, null); // Sem Authorization header
+  const req = mockRequest(body, null);
   const client = createMockSupabaseClient({ data: null, error: null });
   const prompt = createMockPrompt();
   
@@ -239,14 +228,14 @@ Deno.test("Handler - Error 401 - Sem autenticação", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 401);
-  assertEquals(json.error, "Usuário não autenticado.");
+  assertEquals(json.error, "User not authenticated.");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 400 - Campo 'topic' ausente", async () => {
+Deno.test("Handler - Error 400 - Missing 'topic' field", async () => {
   const body = {
-    grade_level: "5º ano",
-    subject: "História"
+    grade_level: "5th grade",
+    subject: "History"
   };
   
   const req = mockRequest(body);
@@ -257,14 +246,14 @@ Deno.test("Handler - Error 400 - Campo 'topic' ausente", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 400);
-  assertEquals(json.error, "Campo 'topic' é obrigatório.");
+  assertEquals(json.error, "Field 'topic' is required.");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 400 - Campo 'grade_level' ausente", async () => {
+Deno.test("Handler - Error 400 - Missing 'grade_level' field", async () => {
   const body = {
-    topic: "Teste",
-    subject: "História"
+    topic: "Test",
+    subject: "History"
   };
   
   const req = mockRequest(body);
@@ -275,14 +264,14 @@ Deno.test("Handler - Error 400 - Campo 'grade_level' ausente", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 400);
-  assertEquals(json.error, "Campo 'grade_level' é obrigatório.");
+  assertEquals(json.error, "Field 'grade_level' is required.");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 400 - Campo 'subject' ausente", async () => {
+Deno.test("Handler - Error 400 - Missing 'subject' field", async () => {
   const body = {
-    topic: "Teste",
-    grade_level: "5º ano"
+    topic: "Test",
+    grade_level: "5th grade"
   };
   
   const req = mockRequest(body);
@@ -293,15 +282,15 @@ Deno.test("Handler - Error 400 - Campo 'subject' ausente", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 400);
-  assertEquals(json.error, "Campo 'subject' é obrigatório.");
+  assertEquals(json.error, "Field 'subject' is required.");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 400 - duration_minutes menor que 15", async () => {
+Deno.test("Handler - Error 400 - duration_minutes less than 15", async () => {
   const body = {
-    topic: "Teste",
-    grade_level: "5º ano",
-    subject: "História",
+    topic: "Test",
+    grade_level: "5th grade",
+    subject: "History",
     duration_minutes: "10"
   };
   
@@ -313,34 +302,34 @@ Deno.test("Handler - Error 400 - duration_minutes menor que 15", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 400);
-  assertEquals(json.error, "Duração em minuto maior que 15");
+  assertEquals(json.error, "Duration in minutes must be greater than 15.");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 500 - GEMINI_API_KEY não configurada", async () => {
+Deno.test("Handler - Error 500 - GEMINI_API_KEY not configured", async () => {
   const body = {
-    topic: "Teste",
-    grade_level: "5º ano",
-    subject: "História"
+    topic: "Test",
+    grade_level: "5th grade",
+    subject: "History"
   };
   
   const req = mockRequest(body);
   const client = createMockSupabaseClient({ data: null, error: null });
   const prompt = createMockPrompt();
   
-  const res = await mockHandler(req, client, prompt, ""); // API key vazia
+  const res = await mockHandler(req, client, prompt, "");
   const json = await res.json();
   
   assertEquals(res.status, 500);
-  assertEquals(json.error, "GEMINI_API_KEY não configurada.");
+  assertEquals(json.error, "GEMINI_API_KEY not configured.");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 500 - Erro ao salvar no banco", async () => {
+Deno.test("Handler - Error 500 - Database save error", async () => {
   const body = {
-    topic: "Teste",
-    grade_level: "5º ano",
-    subject: "História"
+    topic: "Test",
+    grade_level: "5th grade",
+    subject: "History"
   };
   
   const req = mockRequest(body);
@@ -354,11 +343,11 @@ Deno.test("Handler - Error 500 - Erro ao salvar no banco", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 500);
-  assertEquals(json.error, "Erro ao salvar no banco: Database connection failed");
+  assertEquals(json.error, "Error saving to database: Database connection failed");
 });
 
 //@ts-ignore
-Deno.test("Handler - Error 400 - JSON inválido", async () => {
+Deno.test("Handler - Error 400 - Invalid JSON", async () => {
   const req = new Request("http://localhost/lesson-plan", {
     method: "POST",
     headers: { 
@@ -375,16 +364,16 @@ Deno.test("Handler - Error 400 - JSON inválido", async () => {
   const json = await res.json();
   
   assertEquals(res.status, 400);
-  assertEquals(json.error, "Corpo da requisição inválido (não é JSON).");
+  assertEquals(json.error, "Invalid request body (not JSON).");
 });
 
 //@ts-ignore
-Deno.test("Handler - Validação de todos os campos obrigatórios presentes", async () => {
+Deno.test("Handler - Validation with all required fields present", async () => {
   const body = {
-    topic: "Revolução Francesa",
-    grade_level: "9º ano",
-    subject: "História",
-    learning_context: "Turma avançada",
+    topic: "French Revolution",
+    grade_level: "9th grade",
+    subject: "History",
+    learning_context: "Advanced class",
     duration_minutes: "90"
   };
   
@@ -405,11 +394,11 @@ Deno.test("Handler - Validação de todos os campos obrigatórios presentes", as
 });
 
 //@ts-ignore
-Deno.test("Handler - duration_minutes exatamente 15 (limite válido)", async () => {
+Deno.test("Handler - duration_minutes exactly 15 (valid limit)", async () => {
   const body = {
-    topic: "Teste Limites",
-    grade_level: "5º ano",
-    subject: "Matemática",
+    topic: "Limit Test",
+    grade_level: "5th grade",
+    subject: "Math",
     duration_minutes: "15"
   };
   
