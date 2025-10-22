@@ -1,0 +1,212 @@
+type: collection.insomnia.rest/5.0
+name: Mauá
+meta:
+  id: wrk_428617fd2e5b4e5982218ae055d570f0
+  created: 1744826611443
+  modified: 1760714722940
+collection:
+  - name: cashbox
+    meta:
+      id: fld_feaaf3499110462bae4f854d7472574a
+      created: 1745075112737
+      modified: 1745075112737
+      sortKey: -1745075112737
+  - name: urbanify
+    meta:
+      id: fld_b3de8fd3eb6d41b89fbdbf9dd6e6fa3f
+      created: 1745246542465
+      modified: 1745246587472
+      sortKey: -1745246576406
+  - name: modeva
+    meta:
+      id: fld_f6777d32f0ac4059b57212ded0af2f11
+      created: 1750197033987
+      modified: 1750197033987
+      sortKey: -1750197033987
+  - name: escribo - local
+    meta:
+      id: fld_cd84e032deff49fc8c4ed45e43bb715d
+      created: 1760839730695
+      modified: 1760981194357
+      sortKey: -1760719873687
+  - name: escribo - deploy
+    meta:
+      id: fld_b0293ac943474ca58ca3d1dbdcb9e58a
+      created: 1760927924882
+      modified: 1760981192655
+      sortKey: -1755458453837
+  - name: school - local
+    meta:
+      id: fld_28fe9b27d7f74f7ead4b447828a6052a
+      created: 1760981255245
+      modified: 1760981301046
+      sortKey: -1760981255245
+  - name: school - deploy
+    meta:
+      id: fld_f97eedad9c9c47129b5f34d66f1c953d
+      created: 1761075278667
+      modified: 1761104369899
+      sortKey: -1760850564466
+    children:
+      - url: https://ckxwzvxcibtmzzyeczln.supabase.co/auth/v1/token
+        name: login
+        meta:
+          id: req_0bce7c6f23924a309cb166202d4c5e77
+          created: 1761075278668
+          modified: 1761076749512
+          isPrivate: false
+          sortKey: -1760994883329
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "jadson20051965@gmail.com",
+            	"password": "admin123"
+            }
+        parameters:
+          - name: grant_type
+            value: password
+            disabled: false
+        headers:
+          - name: apikey
+            value: ANON_KEY
+            id: pair_dbff9f067e114a028bfdbf990eea8756
+          - name: Content-Type
+            value: application/json
+            id: pair_37c4296ddb3642b0b6ae6267cbdf394a
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://ckxwzvxcibtmzzyeczln.supabase.co/auth/v1/signup
+        name: signup
+        meta:
+          id: req_1d61835d9a3b432fa932c5816af1f5cb
+          created: 1761075278668
+          modified: 1761076751474
+          isPrivate: false
+          sortKey: -1760994883429
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "jadson20051965@gmail.com",
+            	"password": "admin123"
+            }
+        headers:
+          - name: apikey
+            value: ANON_KEY
+            id: pair_6c8df2522a2945dda8e6d6f659dbab7d
+          - name: "Content-Type:"
+            value: application/json
+            id: pair_bd5f9d2a4433497ab5b0be641df3d128
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://ckxwzvxcibtmzzyeczln.supabase.co/functions/v1/generate_lesson_plans
+        name: generate_lesson_plan
+        meta:
+          id: req_45ec43fc5a5140edb0ac93748f1b1fa9
+          created: 1761075278668
+          modified: 1761076967282
+          isPrivate: false
+          sortKey: -1760237792621.7803
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"topic": "Fluxo da agua",
+            	"grade_level": "1° ano", 
+            	"subject": "Ciência",
+            	"learning_context": "Sala de aula ao ar livre",
+            	"duration_minutes": "20"
+            }
+        parameters:
+          - name: some_column
+            value: eq.someValue
+            disabled: false
+        headers:
+          - name: apikey
+            value: ANON_KEY
+            id: pair_9e11a81568794c3d9c8d6317786e8bc3
+          - name: Content-Type
+            value: application/json
+            id: pair_628849f4e8dc46f0a341f47fa15e5218
+        authentication:
+          type: bearer
+          prefix: Bearer
+          token: ACCESS_TOKEN
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://ckxwzvxcibtmzzyeczln.supabase.co/rest/v1/lesson_plans
+        name: lesson_plans
+        meta:
+          id: req_d69497905bf5402896544f2cc222e701
+          created: 1761075278669
+          modified: 1761076988693
+          isPrivate: false
+          sortKey: -1760237792521.7803
+        method: GET
+        parameters:
+          - name: select
+            value: "*"
+            disabled: false
+        headers:
+          - name: apikey
+            value: ANON_KEY
+        authentication:
+          type: bearer
+          prefix: Bearer
+          token: ACCESS_TOKEN
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_41ec34416906f2eb515e81cb1ca02f9de93c3215
+    created: 1744826611445
+    modified: 1761104348660
+  cookies:
+    - key: __cf_bm
+      value: U7Krjha0701LrNBWEgM1O3XPA.qWP4bDws.Ji3TkglQ-1761104348-1.0.1.1-7J3b7_5E4fuIeNi3BSpDUEITC1xLZjAIVeRy_87nIMiKd2MeJVh1Y8spIQ7.Pz3zPWxaOFQ9T6dCzR8hnEICFTJl86KyIwcGtrkVurwpF4U
+      domain: supabase.co
+      path: /
+      secure: true
+      httpOnly: true
+      hostOnly: false
+      creation: 2025-10-17T19:55:32.535Z
+      lastAccessed: 2025-10-22T03:39:08.657Z
+      id: 63bedded-0453-41ed-9c12-507276bc9149
+environments:
+  name: Base Environment
+  meta:
+    id: env_41ec34416906f2eb515e81cb1ca02f9de93c3215
+    created: 1744826611445
+    modified: 1746222815429
+    isPrivate: false
+  data:
+    AdminAccessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOWU4YTMzMjEtM2RjYS00NTYwLWI2OGMtNGM3YmRmM2U2MWYxIiwiaWF0IjoxNzQ2MjIyODA2LCJleHAiOjE3NDg4MTQ4MDZ9.Lh3nRXyp8O9yCkMze_3IaF76KwQjBF6oFjbQMHFVi1c

@@ -1,3 +1,10 @@
+Claro, ótima ideia. Adicionar uma referência a um arquivo de especificação formal (como um YAML OpenAPI) é uma excelente prática.
+
+Eu vou inserir essa informação logo no início da seção "Documentação da API".
+
+Aqui está o `README.md` atualizado:
+
+````markdown
 # Gerador de Planos de Aula com IA (Teste Técnico)
 
 Este projeto é um sistema full-stack que gera planos de aula personalizados utilizando a API do Google Gemini. O backend é construído com Supabase (Banco de Dados, Autenticação e Edge Functions) e o frontend com Next.js.
@@ -152,7 +159,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI...`
 
    `npm run dev`
 
-Acesse [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) no seu navegador.
+Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
 ---
 
@@ -246,6 +253,129 @@ Implementei uma arquitetura defensiva para lidar com essa instabilidade.
 
 ---
 
+## 🚀 Documentação da API (Endpoints)
+
+A principal interação com o backend é feita através de uma única Edge Function do Supabase, que atua como o endpoint principal da API.
+
+**Para uma especificação detalhada (OpenAPI), consulte o arquivo: [docs/endpoints.yaml](docs/endpoints.yaml)**
+
+### POST /functions/v1/generate_lesson_plans
+
+Cria e armazena um novo plano de aula gerado pela IA. Este endpoint é protegido e requer um token de autenticação (JWT) do usuário logado.
+
+#### Headers Obrigatórios
+
+| Header          | Descrição                                                               |
+| --------------- | ----------------------------------------------------------------------- |
+| `Authorization` | `Bearer <SEU_JWT_TOKEN_DE_USUÁRIO>` (Obtido após o login)               |
+| `apikey`        | `<SUA_SUPABASE_ANON_KEY>` (A chave pública anônima do projeto Supabase) |
+| `Content-Type`  | `application/json`                                                      |
+
+#### Corpo da Requisição (Request Body)
+
+Um objeto JSON contendo os parâmetros para a geração do plano.
+
+```json
+{
+  "topic": "Fluxo da agua",
+  "grade_level": "1° ano",
+  "subject": "Ciência",
+  "learning_context": "Sala de aula ao ar livre",
+  "duration_minutes": "20"
+}
+```
+````
+
+#### Resposta de Sucesso (200 OK)
+
+Retorna um objeto JSON com o status, o plano de aula completo salvo no banco (`lesson_plan_id`), o conteúdo da IA já parseado (`content`) e os metadados da requisição (`metadata`).
+
+```json
+{
+  "success": true,
+  "lesson_plan_id": {
+    "id": 1,
+    "created_at": "2025-10-21T20:02:56.03423+00:00",
+    "updated_at": "2025-10-21T20:02:56.03423+00:00",
+    "user_id": "96296a97-414a-4948-abd2-75e8646e975a",
+    "topic": "Fluxo da agua",
+    "grade_level": "1° ano",
+    "subject": "Ciência",
+    "learning_context": "Sala de aula ao ar livre",
+    "duration_minutes": 20,
+    "generated_content": "{ \"ludic_introduction\": \"...\", \"bncc_goal\": \"...\", ... }",
+    "prompt_debug": "Você é um especialista em pedagogia..."
+  },
+  "content": {
+    "ludic_introduction": "Começar a aula com a música \"Aquarela\" de Toquinho...",
+    "bncc_goal": "(EF01CI04) Comparar características físicas...",
+    "step_by_step": [
+      {
+        "etapa": "Observação inicial",
+        "tempo": "5 minutos",
+        "descricao": "Em círculo, com as crianças sentadas..."
+      },
+      {
+        "etapa": "Experiência prática: ciclo da água simplificado",
+        "tempo": "10 minutos",
+        "descricao": "Demonstrar o ciclo da água de forma simples..."
+      },
+      {
+        "etapa": "Registro e discussão",
+        "tempo": "5 minutos",
+        "descricao": "Pedir para as crianças desenharem o que observaram..."
+      }
+    ],
+    "rubric_evaluation": {
+      "excelente": "Demonstra excelente compreensão do ciclo da água...",
+      "bom": "Demonstra boa compreensão do ciclo da água...",
+      "satisfatorio": "Demonstra compreensão básica do ciclo da água...",
+      "em_desenvolvimento": "Apresenta dificuldades na compreensão..."
+    }
+  },
+  "metadata": {
+    "topic": "Fluxo da agua",
+    "grade_level": "1° ano",
+    "subject": "Ciência",
+    "learning_context": "Sala de aula ao ar livre",
+    "duration_minutes": "20",
+    "created_at": "2025-10-21T20:02:56.168Z"
+  }
+}
+```
+
+#### Resposta de Erro
+
+Conforme descrito na seção "Desafios", a função trata erros e retorna um JSON com a falha.
+
+```json
+{
+  "success": false,
+  "error": "Descrição do erro (ex: Falha ao validar o corpo da requisição, Erro da API do Gemini, JSON inválido retornado pela IA, etc.)"
+}
+```
+
+### Exemplo de Requisição (cURL)
+
+Este é um exemplo de `cURL` para testar o endpoint. Substitua a URL pela do seu projeto (local ou produção) e as chaves de `Authorization` e `apikey`.
+
+```bash
+curl --request POST \
+  --url '[https://ckxwzvxcibtmzzyeczln.supabase.co/functions/v1/generate_lesson_plans](https://ckxwzvxcibtmzzyeczln.supabase.co/functions/v1/generate_lesson_plans)' \
+  --header 'Authorization: Bearer <SEU_JWT_TOKEN_DE_USUÁRIO>' \
+  --header 'apikey: <SUA_SUPABASE_ANON_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"topic": "Fluxo da agua",
+	"grade_level": "1° ano",
+	"subject": "Ciência",
+	"learning_context": "Sala de aula ao ar livre",
+	"duration_minutes": "20"
+}'
+```
+
+---
+
 ## 📋 Schema do Banco de Dados
 
 A arquitetura de dados é centrada em uma única tabela principal, `lesson_plans`.
@@ -321,4 +451,8 @@ FOR ALL
 TO public
 USING ((auth.uid() = user_id))
 WITH CHECK ((auth.uid() = user_id));
+```
+
+```
+
 ```
