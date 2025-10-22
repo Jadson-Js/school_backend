@@ -22,6 +22,34 @@ Você pode testar a aplicação ao vivo e navegar pelos repositórios e pelo pro
 
 ---
 
+### 🖼️ Demonstração Visual
+
+#### Fluxo Completo de Uso
+
+(Um GIF demonstrando todo o processo: login, preenchimento do formulário, estado de carregamento e visualização do resultado.)
+
+![Fluxo Completo da Aplicação](./docs/images/SEU_GIF_DE_FLUXO_COMPLETO.gif)
+
+---
+
+#### Telas Principais
+
+Aqui estão os componentes visuais chave da aplicação, desde a autenticação até o dashboard principal.
+
+|           Autenticação (Login)            |            Autenticação (Cadastro)            |             Dashboard Principal              |
+| :---------------------------------------: | :-------------------------------------------: | :------------------------------------------: |
+| ![Tela de Login](./docs/images/login.png) | ![Tela de Cadastro](./docs/images/signup.png) | ![Tela da Dashboard](./docs/images/home.png) |
+
+---
+
+#### Resultado Final (Plano de Aula)
+
+O plano de aula completo é exibido em um formato limpo após o processamento da IA, pronto para o professor utilizar.
+
+![Demonstração do Resultado Final](./docs/images/demonstration.gif)
+
+---
+
 ## 🛠️ Stack Tecnológica
 
 | **Área**           | **Tecnologias Utilizadas**                            |
@@ -108,7 +136,7 @@ npm install
 
 # 3. Crie o arquivo de variáveis de ambiente
 
-cp .env
+cp .env.example .env
 
 # 4. Edite o .env.local com as chaves do Supabase
 
@@ -158,7 +186,33 @@ A tabela `lesson_plans` tem o RLS ativado.
 
 A escolha pelo Next.js foi estratégica. Além de um ecossistema robusto de ferramentas (roteamento), ele simplifica o deploy para produção (como na Vercel) e facilita a integração com o Supabase para o fluxo de autenticação (Client-Side e Server-Side).
 
-### 6. Persistência de Dados para Depuração e Análise
+---
+
+## 🧪 Estratégia de Testes (Unitários e de Integração)
+
+Para garantir a confiabilidade e a robustez da lógica de negócios, uma estratégia de testes foi implementada, cobrindo as camadas críticas da aplicação: o banco de dados e as funções de backend.
+
+#### 1. Testes de Banco de Dados (com `pgTAP`)
+
+Utilizei a extensão `pgTAP` para criar testes unitários diretamente no PostgreSQL. Esta abordagem foi crucial para validar a lógica e a integridade dos dados na camada mais fundamental.
+
+- **Validação de Triggers:** Testes que asseguram o funcionamento de triggers essenciais, como:
+  - A criação automática de um `profile` para um novo usuário (`auth.users`).
+  - A atualização correta do campo `updated_at` em todas as tabelas.
+- **Validação de Funções `plpgsql`:** Testes que verificam a lógica de funções SQL customizadas, garantindo que elas retornem os dados esperados e manipulem transações corretamente.
+
+#### 2. Testes de Edge Functions (com Deno Test)
+
+A Edge Function `generate_lesson_plans` foi testada usando o _runner_ de testes nativo do Deno, focando em sua interação com a API externa e seu papel como _gateway_.
+
+- **Caminho Feliz (Happy Path):** Simula uma resposta bem-sucedida da API do Gemini, validando que a função:
+  - Processa o JSON da IA corretamente.
+  - Prepara os dados para a inserção no banco.
+- **Tratamento de Falhas (Unhappy Path):** Testes que simulam falhas da API do Gemini (ex: JSON inválido, erro 500), garantindo que a Edge Function:
+  - Capture esses erros (o `try...catch` mencionado na seção 'Desafios').
+  - Retorne o status de erro HTTP apropriado para o frontend.
+
+### 7. Persistência de Dados para Depuração e Análise
 
 O sistema salva não apenas o _output_ da IA (`generated_content`), mas também os _inputs_ do usuário (`topic`, `grade_level`, etc.) e o _prompt_ exato que foi enviado (`prompt_debug`).
 
