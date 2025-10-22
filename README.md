@@ -1,28 +1,23 @@
-Claro, ótima ideia. Adicionar uma referência a um arquivo de especificação formal (como um YAML OpenAPI) é uma excelente prática.
-
-Eu vou inserir essa informação logo no início da seção "Documentação da API".
-
-Aqui está o `README.md` atualizado:
-
-````markdown
 # Gerador de Planos de Aula com IA (Teste Técnico)
 
 Este projeto é um sistema full-stack que gera planos de aula personalizados utilizando a API do Google Gemini. O backend é construído com Supabase (Banco de Dados, Autenticação e Edge Functions) e o frontend com Next.js.
 
 O sistema permite que professores autenticados insiram parâmetros-chave (como tópico, matéria e ano escolar) e recebam um plano de aula completo, estruturado com uma introdução lúdica, objetivos da BNCC, um passo a passo detalhado e uma rubrica de avaliação.
 
-## Acesso e Demonstração
+## 🚀 Acesso e Demonstração
+
+### Links e Credenciais de Teste
 
 Você pode testar a aplicação ao vivo e navegar pelos repositórios e pelo projeto Supabase abaixo.
 
 - **URL da Aplicação (Vercel):** [school-frontend-ihsi.vercel.app](https://school-frontend-ihsi.vercel.app)
 
-### Credenciais de Teste
+**Credenciais:**
 
 - **Email:** `jadson20051965@gmail.com`
 - **Senha:** `admin123`
 
-### Repositórios
+**Repositórios:**
 
 - **Frontend (Next.js):** [github.com/Jadson-Js/school_frontend](https://github.com/Jadson-Js/school_frontend)
 - **Backend (Supabase):** [github.com/Jadson-Js/school_backend](https://github.com/Jadson-Js/school_backend)
@@ -57,7 +52,7 @@ O plano de aula completo é exibido em um formato limpo após o processamento da
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 | **Área**           | **Tecnologias Utilizadas**                            |
 | ------------------ | ----------------------------------------------------- |
@@ -69,7 +64,7 @@ O plano de aula completo é exibido em um formato limpo após o processamento da
 
 ---
 
-## ⚙️ Instruções de Instalação e Execução
+## Instruções de Instalação e Execução
 
 Para executar este projeto localmente, você precisará de dois terminais: um para o backend (Supabase CLI) e um para o frontend (Next.js).
 
@@ -85,43 +80,31 @@ Para executar este projeto localmente, você precisará de dois terminais: um pa
 
 O backend é gerenciado pelo Supabase CLI, que roda o ambiente Supabase localmente em containers Docker.
 
-Bash
-
-#
-
-`# 1. Clone o repositório do backend
+```bash
+# 1. Clone o repositório do backend
 git clone https://github.com/Jadson-Js/school_backend.git
 cd school_backend
 
 # 2. Inicie os serviços do Supabase
-
 # (Isso irá baixar as imagens Docker e iniciar o studio local)
-
 supabase start
 
 # 3. Aplique as migrações do banco de dados
-
 # O script SQL da tabela lesson_plans está em /supabase/migrations
-
 supabase db reset
 
 # 4. Configure sua chave da API do Gemini como um Secret
-
 # Substitua SUA_CHAVE_AQUI pela sua chave real
-
 supabase secrets set GEMINI_API_KEY=SUA_CHAVE_AQUI
 
 # 5. Faça o deploy da Edge Function (que chama a API do Gemini)
-
 supabase functions deploy gerador-plano-aula --no-verify-jwt
 
 # 6. (Opcional) Vincule a um projeto Supabase remoto
-
 # supabase login
-
 # supabase link --project-ref [SEU_PROJECT_REF]
-
-# supabase db push # Para enviar as migrações para o projeto remoto`
+# supabase db push # Para enviar as migrações para o projeto remoto
+```
 
 Ao final do `supabase start`, o terminal exibirá as chaves de API locais (`API URL`, `anon key`, `service_role key`). Você usará a `API URL` e a `anon key` no próximo passo.
 
@@ -129,35 +112,30 @@ Ao final do `supabase start`, o terminal exibirá as chaves de API locais (`API 
 
 ### 2. Frontend (Next.js)
 
-Bash
-
-#
-
-`# 1. Clone o repositório do frontend em outro terminal
+```bash
+# 1. Clone o repositório do frontend em outro terminal
 git clone https://github.com/Jadson-Js/school_frontend.git
 cd school_frontend
 
 # 2. Instale as dependências
-
 npm install
 
 # 3. Crie o arquivo de variáveis de ambiente
-
 cp .env.example .env
 
 # 4. Edite o .env.local com as chaves do Supabase
-
 # Use as chaves fornecidas pelo comando "supabase start"
-
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI...`
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI...
+```
 
 ### 3. Executando o Projeto
 
-1. **Backend:** Certifique-se de que o `supabase start` esteja rodando.
-2. **Frontend:** No diretório `school_frontend`, execute:Bash
-
-   `npm run dev`
+1.  **Backend:** Certifique-se de que o `supabase start` esteja rodando.
+2.  **Frontend:** No diretório `school_frontend`, execute:
+    ```bash
+    npm run dev
+    ```
 
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
@@ -177,29 +155,29 @@ Em vez de criar múltiplas colunas de texto (`introducao_ludica`, `objetivo_bncc
 
 - **Vantagem:** Esta abordagem é drasticamente mais performática e flexível. Ela permite que a estrutura da resposta da IA evolua sem a necessidade de migrações de banco de dados (ALTER TABLE), e consultar dados aninhados em `jsonb` é altamente eficiente no PostgreSQL.
 
-### 3. Backend: Supabase Edge Function vs. Next.js API Route
-
-A chamada para a API do Gemini é feita em uma **Supabase Edge Function** (`gerador-plano-aula`), e não em uma API Route do Next.js.
-
-- **Por quê?** Segurança em primeiro lugar. A `GEMINI_API_KEY` é armazenada com segurança nos **Supabase Secrets** e só é acessível pela Edge Function. Isso evita completamente que a chave seja exposta no lado do cliente ou mesmo no ambiente do Next.js, centralizando a lógica de IA sensível no backend.
-
-### 4. Segurança: Row Level Security (RLS)
+### 3. Segurança: Row Level Security (RLS)
 
 A tabela `lesson_plans` tem o RLS ativado.
 
 - **Implementação:** Foram criadas políticas (`POLICY`) que garantem que um usuário autenticado (`auth.uid()`) só possa criar, ler, atualizar ou deletar os planos de aula que estão vinculados ao seu próprio `user_id`.
 
-### 5. Frontend: Next.js
+### 4. Frontend: Next.js
 
 A escolha pelo Next.js foi estratégica. Além de um ecossistema robusto de ferramentas (roteamento), ele simplifica o deploy para produção (como na Vercel) e facilita a integração com o Supabase para o fluxo de autenticação (Client-Side e Server-Side).
 
+### 5. Persistência de Dados para Depuração e Análise
+
+O sistema salva não apenas o _output_ da IA (`generated_content`), mas também os _inputs_ do usuário (`topic`, `grade_level`, etc.) e o _prompt_ exato que foi enviado (`prompt_debug`).
+
+- **Vantagem:** Esta decisão é crítica para a manutenção e evolução do produto. Se um plano de aula for gerado com baixa qualidade, podemos depurar exatamente qual _prompt_ causou o problema e iterar em melhorias, além de permitir análises futuras sobre os temas mais pedidos.
+
 ---
 
-## 🧪 Estratégia de Testes (Unitários e de Integração)
+## Estratégia de Testes (Unitários e de Integração)
 
 Para garantir a confiabilidade e a robustez da lógica de negócios, uma estratégia de testes foi implementada, cobrindo as camadas críticas da aplicação: o banco de dados e as funções de backend.
 
-#### 1. Testes de Banco de Dados (com `pgTAP`)
+### 1. Testes de Banco de Dados (com `pgTAP`)
 
 Utilizei a extensão `pgTAP` para criar testes unitários diretamente no PostgreSQL. Esta abordagem foi crucial para validar a lógica e a integridade dos dados na camada mais fundamental.
 
@@ -208,7 +186,7 @@ Utilizei a extensão `pgTAP` para criar testes unitários diretamente no Postgre
   - A atualização correta do campo `updated_at` em todas as tabelas.
 - **Validação de Funções `plpgsql`:** Testes que verificam a lógica de funções SQL customizadas, garantindo que elas retornem os dados esperados e manipulem transações corretamente.
 
-#### 2. Testes de Edge Functions (com Deno Test)
+### 2. Testes de Edge Functions (com Deno Test)
 
 A Edge Function `generate_lesson_plans` foi testada usando o _runner_ de testes nativo do Deno, focando em sua interação com a API externa e seu papel como _gateway_.
 
@@ -218,12 +196,6 @@ A Edge Function `generate_lesson_plans` foi testada usando o _runner_ de testes 
 - **Tratamento de Falhas (Unhappy Path):** Testes que simulam falhas da API do Gemini (ex: JSON inválido, erro 500), garantindo que a Edge Function:
   - Capture esses erros (o `try...catch` mencionado na seção 'Desafios').
   - Retorne o status de erro HTTP apropriado para o frontend.
-
-### 7. Persistência de Dados para Depuração e Análise
-
-O sistema salva não apenas o _output_ da IA (`generated_content`), mas também os _inputs_ do usuário (`topic`, `grade_level`, etc.) e o _prompt_ exato que foi enviado (`prompt_debug`).
-
-- **Vantagem:** Esta decisão é crítica para a manutenção e evolução do produto. Se um plano de aula for gerado com baixa qualidade, podemos depurar exatamente qual _prompt_ causou o problema e iterar em melhorias, além de permitir análises futuras sobre os temas mais pedidos.
 
 ---
 
@@ -235,21 +207,21 @@ O maior desafio deste projeto não foi a integração, mas sim a natureza da IA:
 
 A API do Gemini é poderosa, mas "criativa". Havia um risco de a IA:
 
-1. Não retornar um JSON válido.
-2. Retornar um JSON, mas com chaves faltantes ou nomes diferentes (ex: `introducao` em vez de `ludic_introduction`).
-3. Demorar muito ou falhar (erro 500, 429).
+1.  Não retornar um JSON válido.
+2.  Retornar um JSON, mas com chaves faltantes ou nomes diferentes (ex: `introducao` em vez de `ludic_introduction`).
+3.  Demorar muito ou falhar (erro 500, 429).
 
 ### Solução: Uma Abordagem de "Contenção" em Múltiplas Camadas
 
 Implementei uma arquitetura defensiva para lidar com essa instabilidade.
 
-1. **Engenharia de Prompt (Prompt Engineering):** O prompt enviado à IA não apenas pede o conteúdo, mas _instrui rigorosamente_ sobre o formato de saída. Ele especifica que a resposta DEVE ser um objeto JSON, detalhando os nomes exatos das chaves e os tipos de dados esperados (ex: `step_by_step` deve ser um array de objetos).
-2. **Validação na Edge Function (Backend):** A Edge Function atua como um portão de controle.
-   - Ela envolve a chamada `JSON.parse()` em um bloco `try...catch`. Se o _parse_ falhar, a IA não retornou um JSON válido e um erro é retornado ao cliente.
-   - Após o _parse_, ela valida a presença das chaves essenciais (`ludic_introduction`, `bncc_goal`, etc.). Se uma chave vital estiver faltando, a resposta é considerada insatisfatória e um erro é retornado.
-3. **Tratamento de Erros (Frontend):** O frontend está preparado para falhas.
-   - O botão "Gerar" exibe um estado de _loading_ para informar o usuário que o processamento está em andamento.
-   - Qualquer erro retornado pela Edge Function (JSON inválido, erro da API do Gemini, falha no banco de dados) é capturado e exibido ao usuário através de uma notificação (toast/alert), permitindo que ele tente novamente.
+1.  **Engenharia de Prompt (Prompt Engineering):** O prompt enviado à IA não apenas pede o conteúdo, mas _instrui rigorosamente_ sobre o formato de saída. Ele especifica que a resposta DEVE ser um objeto JSON, detalhando os nomes exatos das chaves e os tipos de dados esperados (ex: `step_by_step` deve ser um array de objetos).
+2.  **Validação na Edge Function (Backend):** A Edge Function atua como um portão de controle.
+    - Ela envolve a chamada `JSON.parse()` em um bloco `try...catch`. Se o _parse_ falhar, a IA não retornou um JSON válido e um erro é retornado ao cliente.
+    - Após o _parse_, ela valida a presença das chaves essenciais (`ludic_introduction`, `bncc_goal`, etc.). Se uma chave vital estiver faltando, a resposta é considerada insatisfatória e um erro é retornado.
+3.  **Tratamento de Erros (Frontend):** O frontend está preparado para falhas.
+    - O botão "Gerar" exibe um estado de _loading_ para informar o usuário que o processamento está em andamento.
+    - Qualquer erro retornado pela Edge Function (JSON inválido, erro da API do Gemini, falha no banco de dados) é capturado e exibe ao usuário através de uma notificação (toast/alert), permitindo que ele tente novamente.
 
 ---
 
@@ -284,7 +256,6 @@ Um objeto JSON contendo os parâmetros para a geração do plano.
   "duration_minutes": "20"
 }
 ```
-````
 
 #### Resposta de Sucesso (200 OK)
 
@@ -361,16 +332,16 @@ Este é um exemplo de `cURL` para testar o endpoint. Substitua a URL pela do seu
 
 ```bash
 curl --request POST \
-  --url '[https://ckxwzvxcibtmzzyeczln.supabase.co/functions/v1/generate_lesson_plans](https://ckxwzvxcibtmzzyeczln.supabase.co/functions/v1/generate_lesson_plans)' \
+  --url 'https://ckxwzvxcibtmzzyeczln.supabase.co/functions/v1/generate_lesson_plans' \
   --header 'Authorization: Bearer <SEU_JWT_TOKEN_DE_USUÁRIO>' \
   --header 'apikey: <SUA_SUPABASE_ANON_KEY>' \
   --header 'Content-Type: application/json' \
   --data '{
-	"topic": "Fluxo da agua",
-	"grade_level": "1° ano",
-	"subject": "Ciência",
-	"learning_context": "Sala de aula ao ar livre",
-	"duration_minutes": "20"
+  "topic": "Fluxo da agua",
+  "grade_level": "1° ano",
+  "subject": "Ciência",
+  "learning_context": "Sala de aula ao ar livre",
+  "duration_minutes": "20"
 }'
 ```
 
@@ -412,8 +383,6 @@ CREATE TABLE PUBLIC.lesson_plans (
 
 **Políticas de Segurança (RLS):**
 
-SQL
-
 ```sql
 ALTER TABLE public.lesson_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -451,8 +420,4 @@ FOR ALL
 TO public
 USING ((auth.uid() = user_id))
 WITH CHECK ((auth.uid() = user_id));
-```
-
-```
-
 ```
