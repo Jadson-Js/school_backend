@@ -12,6 +12,7 @@ CREATE OR REPLACE FUNCTION insert_lesson_plan (
 )
 RETURNS lesson_plans
 LANGUAGE sql
+SET search_path = ''
 SECURITY INVOKER
 AS $$
   INSERT INTO public.lesson_plans (
